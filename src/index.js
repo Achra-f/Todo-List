@@ -1,21 +1,16 @@
 import './style.css';
+import { ProjectList } from './projectList';
+import { InboxList } from './inboxList';
+import { PageLoader } from './pageLoader';
 
-const openModalButtons = document.querySelectorAll('.open-modal');
-const closeModalButtons = document.querySelectorAll('.close-modal');
-const modalOverlay = document.querySelector('.modal-overlay');
+const projectList = new ProjectList();
+const inboxList = new InboxList();
 
-openModalButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    const modalId = button.dataset.modal;
-    const modal = document.getElementById(modalId);
-    modalOverlay.style.display = 'flex';
-    modal.style.display = 'block';
-  });
-});
+projectList.addProject('Project 1');
+projectList.addProject('Project 2');
 
-closeModalButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    modalOverlay.style.display = 'none';
-    button.parentElement.style.display = 'none';
-  });
-});
+inboxList.addTask('Task 1');
+inboxList.addTask('Task 2');
+
+const pageLoader = new PageLoader(projectList, inboxList);
+pageLoader.loadInitialData();
