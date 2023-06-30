@@ -17,4 +17,12 @@ export class ProjectList {
     getAllProjects() {
         return this.projects;
     }
+
+    getTasksByProject(projectId) {
+        const project = this.projects.find((project) => project.id === projectId);
+        if (project) {
+            return project.tasks;
+        }
+        return [];
+    }
 }

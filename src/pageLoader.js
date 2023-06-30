@@ -17,6 +17,8 @@ export class PageLoader {
 
 
     renderProjects(projects) {
+        this.projectsElement.innerHTML = '';
+
         projects.forEach((project) => {
             const projectElement = document.createElement('div');
             projectElement.textContent = project;
@@ -27,6 +29,9 @@ export class PageLoader {
         const addProjectButton = document.createElement('button');
         addProjectButton.textContent = 'Add Project';
         addProjectButton.classList.add('sidebar__project');
+        addProjectButton.addEventListener('click', () => {
+            this.createProjectModal();
+        });
         this.projectsElement.appendChild(addProjectButton);
     }
 
@@ -60,7 +65,7 @@ export class PageLoader {
         });
         taskList.appendChild(addTaskButton);
 
-        this.contentElement.innerHTML = ''; 
+        this.contentElement.innerHTML = '';
         this.contentElement.appendChild(tasksEl);
         this.contentElement.appendChild(taskList);
     }
@@ -168,4 +173,48 @@ export class PageLoader {
 
     }
 
+    createProjectModal() {
+        const modalContainer = document.createElement('div');
+        modalContainer.classList.add('modal-container');
+
+        const formHTML = `
+    <div class="modal-content">
+      <h2>New Project</h2>
+      <form>
+        <label for="projectName">Project Name:</label>
+        <input type="text" id="projectName" name="projectName">
+        <button type="submit">Create Project</button>
+      </form>
+      <button class="modal-close">Close</button>
+    </div>
+  `;
+
+        modalContainer.insertAdjacentHTML('beforeend', formHTML);
+
+        const closeButton = modalContainer.querySelector('.modal-close');
+        closeButton.addEventListener('click', () => {
+            modalContainer.remove();
+        });
+
+        // Append the modal container to the document body
+        document.body.appendChild(modalContainer);
+
+        modalContainer.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const projectName = formData.get('projectName');
+
+            if (projectName.trim() !== '') {
+                // Add the new project to the ProjectList
+                this.projectList.addProject(projectName);
+                // Re-render the projects
+                this.renderProjects(this.projectList.getAllProjects());
+                // Close the modal
+                modalContainer.remove();
+            }
+        });
+    }
+
 }
+
+

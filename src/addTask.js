@@ -6,5 +6,6 @@ export class Task {
         this.priority = priority;
         this.notes = notes;
         this.checkList = checkList;
+        
     }
 }
