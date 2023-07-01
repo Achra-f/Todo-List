@@ -1,28 +1,25 @@
 export class ProjectList {
     constructor() {
-        this.projects = [];
+      this.projects = [];
     }
-
+  
     addProject(project) {
-        this.projects.push(project);
+      this.projects.push(project);
     }
-
+  
     removeProject(project) {
-        const projectIndex = this.projects.indexOf(project);
-        if (projectIndex !== -1) {
-            this.projects.splice(projectIndex, 1);
-        }
+      const projectIndex = this.projects.indexOf(project);
+      if (projectIndex !== -1) {
+        this.projects.splice(projectIndex, 1);
+      }
     }
-
+  
     getAllProjects() {
-        return this.projects;
+      return this.projects;
     }
-
-    getTasksByProject(projectId) {
-        const project = this.projects.find((project) => project.id === projectId);
-        if (project) {
-            return project.tasks;
-        }
-        return [];
+  
+    getProjectById(projectId) {
+      return this.projects.find(project => project.id === projectId);
     }
-}
+  }
+  

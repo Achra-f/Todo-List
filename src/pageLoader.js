@@ -36,39 +36,89 @@ export class PageLoader {
     }
 
     renderTasks(tasks) {
+        const inboxTasks = [];
+        const projectTasks = {};
+      
+        tasks.forEach((task) => {
+          if (task.projectId === null) {
+            inboxTasks.push(task);
+          } else {
+            if (!projectTasks[task.projectId]) {
+              projectTasks[task.projectId] = [];
+            }
+            projectTasks[task.projectId].push(task);
+          }
+        });
+      
         const tasksEl = document.createElement('div');
         tasksEl.classList.add('tasks');
         tasksEl.textContent = 'Inbox';
-
+      
         const taskList = document.createElement('div');
         taskList.classList.add('main-content__todo');
-
-        tasks.forEach((task) => {
-            const taskElement = document.createElement('div');
-            taskElement.textContent = task.title;
-            taskElement.classList.add('main-content__todos');
-            taskList.appendChild(taskElement);
-
-            taskElement.addEventListener('click', () => {
-                this.openTaskModal(task);
-            });
-
-            taskList.appendChild(taskElement);
+      
+        inboxTasks.forEach((task) => {
+          const taskElement = document.createElement('div');
+          taskElement.textContent = task.title;
+          taskElement.classList.add('main-content__todos');
+          taskList.appendChild(taskElement);
+      
+          taskElement.addEventListener('click', () => {
+            this.openTaskModal(task);
+          });
         });
-
+      
         const addTaskButton = document.createElement('button');
         addTaskButton.textContent = 'Add New Task';
         addTaskButton.classList.add('main-content__todos');
         addTaskButton.setAttribute('data-modal', 'task');
         addTaskButton.addEventListener('click', () => {
-            this.createTaskModal();
+          this.createTaskModal(null);
         });
         taskList.appendChild(addTaskButton);
-
+      
         this.contentElement.innerHTML = '';
         this.contentElement.appendChild(tasksEl);
         this.contentElement.appendChild(taskList);
-    }
+      
+        for (const projectId in projectTasks) {
+          if (projectTasks.hasOwnProperty(projectId)) {
+            const project = this.projectList.getProjectById(projectId);
+            if (project) {
+              const projectElement = document.createElement('div');
+              projectElement.textContent = project.name;
+              projectElement.classList.add('sidebar__project');
+              this.projectsElement.appendChild(projectElement);
+      
+              const projectTaskList = document.createElement('ul');
+              projectTaskList.classList.add('task-list');
+      
+              projectTasks[projectId].forEach((task) => {
+                const taskElement = document.createElement('li');
+                taskElement.textContent = task.title;
+                projectTaskList.appendChild(taskElement);
+      
+                taskElement.addEventListener('click', () => {
+                  this.openTaskModal(task);
+                });
+              });
+      
+              projectElement.appendChild(projectTaskList);
+      
+              const addTaskButton = document.createElement('button');
+              addTaskButton.textContent = 'Add Task';
+              addTaskButton.classList.add('add-task-button');
+              addTaskButton.setAttribute('data-project-id', projectId);
+              addTaskButton.addEventListener('click', (event) => {
+                const projectId = event.target.getAttribute('data-project-id');
+                this.createTaskModal(projectId);
+              });
+      
+              projectElement.appendChild(addTaskButton);
+            }
+          }
+        }
+      }
 
     openTaskModal(task) {
         const modalContainer = document.createElement('div');
@@ -162,13 +212,23 @@ export class PageLoader {
                 taskData.dueDate,
                 taskData.priority,
                 taskData.notes,
-                taskData.checklist.split('\n')
+                taskData.checklist.split('\n'),
+                projectId
             );
 
-            this.inboxList.addTask(newTask);
-            this.renderTasks(this.inboxList.getAllTasks());
-
-            modalContainer.remove();
+            if (projectId === null) {
+                this.inboxList.addTask(newTask);
+              } else {
+                const project = this.projectList.getProjectById(projectId);
+                if (project) {
+                  project.addTask(newTask);
+                }
+              }
+          
+              this.renderProjects(this.projectList.getAllProjects());
+              this.renderTasks(this.inboxList.getAllTasks());
+          
+              modalContainer.remove();
         });
 
     }
