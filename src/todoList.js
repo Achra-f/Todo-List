@@ -10,6 +10,10 @@ export class TodoList {
         const newProject = new Project(name);
         this.projects.push(newProject);
     }
+    
+    getProject(name) {
+        return this.projects.find(project => project.name === name);
+    }
 
     addTaskToProject(projectName, taskDescription, taskDueDate) {
         const project = this.projects.find(project => project.name === projectName);
