@@ -1,3 +1,5 @@
+import { Task } from "./task";
+import { Project } from "./project";
 export class PageLoad {
     constructor(todoList) {
         this.todoList = todoList;
@@ -51,7 +53,7 @@ export class PageLoad {
         addTaskButton.id = 'add-project-btn';
         addTaskButton.addEventListener('click', () => {
             addTaskButton.style.display = 'none';
-            this.displayTaskForm(buttonContainer, addTaskButton);
+            this.displayProjectForm(buttonContainer, addTaskButton);
         });
 
         const buttonContainer = document.createElement('div');
@@ -76,11 +78,19 @@ export class PageLoad {
                 taskElement.classList.add('task-item');
                 this.tasksContainer.appendChild(taskElement);
             });
-        }
 
+            const addButton = document.createElement('button');
+            addButton.textContent = 'Add Task';
+            addButton.addEventListener('click', () => {
+                this.displayTaskForm();
+            });
+
+            this.tasksContainer.appendChild(addButton);
+        }
     }
 
-    displayTaskForm(buttonContainer, addTaskButton) {
+
+    displayProjectForm(buttonContainer, addTaskButton) {
         this.clearTasksContainer();
 
         const formContainer = document.createElement('div');
@@ -134,6 +144,83 @@ export class PageLoad {
 
         });
     }
+
+    displayTaskForm() {
+        this.clearTasksContainer();
+
+        const formContainer = document.createElement('div');
+        formContainer.classList.add('form-container');
+
+        const titleLabel = document.createElement('label');
+        titleLabel.textContent = 'Title:';
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+
+        const descriptionLabel = document.createElement('label');
+        descriptionLabel.textContent = 'Description:';
+        const descriptionInput = document.createElement('textarea');
+
+        const dueDateLabel = document.createElement('label');
+        dueDateLabel.textContent = 'Due Date:';
+        const dueDateInput = document.createElement('input');
+        dueDateInput.type = 'date';
+
+        const priorityLabel = document.createElement('label');
+        priorityLabel.textContent = 'Priority:';
+        const priorityInput = document.createElement('select');
+        const option1 = document.createElement('option');
+        option1.textContent = 'High';
+        const option2 = document.createElement('option');
+        option2.textContent = 'Medium';
+        const option3 = document.createElement('option');
+        option3.textContent = 'Low';
+        priorityInput.appendChild(option1);
+        priorityInput.appendChild(option2);
+        priorityInput.appendChild(option3);
+
+        const addButton = document.createElement('button');
+        addButton.textContent = 'Add Task';
+        addButton.addEventListener('click', () => {
+            const title = titleInput.value;
+            const description = descriptionInput.value;
+            const dueDate = dueDateInput.value;
+            const priority = priorityInput.value;
+
+            // Create a new task object and add it to the current project
+            const newTask = new Task(title, description, dueDate, priority);
+            this.currentProject.addTask(newTask);
+
+            // Clear the form inputs
+            titleInput.value = '';
+            descriptionInput.value = '';
+            dueDateInput.value = '';
+            priorityInput.value = '';
+
+            // Display the updated task list
+            this.displayTasks();
+        });
+
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.addEventListener('click', () => {
+            this.clearTasksContainer();
+            this.displayTasks();
+        });
+
+        formContainer.appendChild(titleLabel);
+        formContainer.appendChild(titleInput);
+        formContainer.appendChild(descriptionLabel);
+        formContainer.appendChild(descriptionInput);
+        formContainer.appendChild(dueDateLabel);
+        formContainer.appendChild(dueDateInput);
+        formContainer.appendChild(priorityLabel);
+        formContainer.appendChild(priorityInput);
+        formContainer.appendChild(addButton);
+        formContainer.appendChild(cancelButton);
+
+        this.tasksContainer.appendChild(formContainer);
+    }
+
 
 
     clearListsContainer() {
