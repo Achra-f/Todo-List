@@ -76,10 +76,14 @@ export class PageLoad {
                 const taskElement = document.createElement('div');
                 taskElement.textContent = task.title;
                 taskElement.classList.add('task-item');
+                taskElement.addEventListener('click', () => {
+                    this.openTaskDetails(task);
+                });
                 this.tasksContainer.appendChild(taskElement);
             });
 
             const addButton = document.createElement('button');
+            addButton.classList.add('addBtn');
             addButton.textContent = 'Add Task';
             addButton.addEventListener('click', () => {
                 this.displayTaskForm();
@@ -88,6 +92,45 @@ export class PageLoad {
             this.tasksContainer.appendChild(addButton);
         }
     }
+
+    openTaskDetails(task) {
+        const taskModal = document.getElementById('taskModal');
+        const taskTitle = document.getElementById('taskTitle');
+        const taskDescription = document.getElementById('taskDescription');
+        const taskDueDate = document.getElementById('taskDueDate');
+        const taskPriority = document.getElementById('taskPriority');
+        const taskNotes = document.getElementById('taskNotes');
+        const taskChecklist = document.getElementById('taskChecklist');
+        const taskStatus = document.getElementById('taskStatus');
+
+        taskTitle.textContent = task.title;
+        taskDescription.textContent = task.description;
+        taskDueDate.textContent = 'Due Date: ' + task.dueDate;
+        taskPriority.textContent = 'Priority: ' + task.priority;
+        taskNotes.textContent = 'Notes: ' + task.notes;
+        taskChecklist.innerHTML = '';
+        task.checklist.forEach((item) => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            taskChecklist.appendChild(li);
+        });
+        taskStatus.textContent = 'Status: ' + task.status;
+
+        taskModal.style.display = 'block';
+
+        const closeBtn = document.querySelector('.close');
+        closeBtn.addEventListener('click', () => {
+            taskModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === taskModal) {
+                taskModal.style.display = 'none';
+            }
+        });
+    }
+
+
 
 
     displayProjectForm(buttonContainer, addTaskButton) {
@@ -116,17 +159,13 @@ export class PageLoad {
         submitButton.addEventListener('click', () => {
             const projectName = nameInput.value;
 
-            // Hide the form
             formContainer.style.display = 'none';
 
-            // Clear the tasks container
             this.clearTasksContainer();
 
-            // Show the button and add task button
             buttonContainer.style.display = 'block';
             addTaskButton.style.display = 'block';
 
-            // Add the project if the project name is not empty
             if (projectName.trim() !== '') {
                 this.todoList.addProject(projectName);
                 this.displayTodoLists();
@@ -179,6 +218,7 @@ export class PageLoad {
         priorityInput.appendChild(option3);
 
         const addButton = document.createElement('button');
+        addButton.classList.add('addBtn');
         addButton.textContent = 'Add Task';
         addButton.addEventListener('click', () => {
             const title = titleInput.value;
@@ -186,21 +226,19 @@ export class PageLoad {
             const dueDate = dueDateInput.value;
             const priority = priorityInput.value;
 
-            // Create a new task object and add it to the current project
             const newTask = new Task(title, description, dueDate, priority);
             this.currentProject.addTask(newTask);
 
-            // Clear the form inputs
             titleInput.value = '';
             descriptionInput.value = '';
             dueDateInput.value = '';
             priorityInput.value = '';
 
-            // Display the updated task list
             this.displayTasks();
         });
 
         const cancelButton = document.createElement('button');
+        cancelButton.classList.add('cancelBtn');
         cancelButton.textContent = 'Cancel';
         cancelButton.addEventListener('click', () => {
             this.clearTasksContainer();
