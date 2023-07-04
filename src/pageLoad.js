@@ -15,8 +15,6 @@ export class PageLoad {
         const inboxProject = this.todoList.getProject('Inbox');
 
         if (inboxProject) {
-
-
             const inboxListElement = document.createElement('div');
             inboxListElement.textContent = inboxProject.name;
             inboxListElement.classList.add('list-item');
@@ -36,33 +34,58 @@ export class PageLoad {
         const otherProjects = this.todoList.projects.filter(project => project.name !== 'Inbox');
 
         otherProjects.forEach(project => {
-            const listElement = document.createElement('div');
-            listElement.textContent = project.name;
-            listElement.classList.add('list-item');
+            const projectElement = document.createElement('div');
+            projectElement.classList.add('list-item');
 
-            listElement.addEventListener('click', () => {
+            const projectName = document.createElement('span');
+            projectName.textContent = project.name;
+            projectElement.appendChild(projectName);
+
+            const deleteIcon = document.createElement('i');
+            deleteIcon.classList.add('fa', 'fa-trash-o');
+
+            deleteIcon.addEventListener('click', () => {
+                this.deleteProject(project);
+            });
+
+            projectElement.appendChild(deleteIcon);
+
+            projectElement.addEventListener('click', () => {
                 this.currentProject = project;
                 this.displayTasks();
             });
 
-            this.listsContainer.appendChild(listElement);
+            this.listsContainer.appendChild(projectElement);
         });
 
-        const addTaskButton = document.createElement('button');
-        addTaskButton.textContent = 'Add Project';
-        addTaskButton.id = 'add-project-btn';
-        addTaskButton.addEventListener('click', () => {
-            addTaskButton.style.display = 'none';
-            this.displayProjectForm(buttonContainer, addTaskButton);
+        const addProjectButton = document.createElement('button');
+        addProjectButton.textContent = 'Add Project';
+        addProjectButton.id = 'add-project-btn';
+        addProjectButton.addEventListener('click', () => {
+            addProjectButton.style.display = 'none';
+            this.displayProjectForm(buttonContainer, addProjectButton);
         });
 
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add('button-container');
-        buttonContainer.appendChild(addTaskButton);
+        buttonContainer.appendChild(addProjectButton);
 
         this.listsContainer.appendChild(buttonContainer);
     }
 
+    deleteProject(project) {
+        const projectIndex = this.todoList.projects.indexOf(project);
+        if (projectIndex !== -1) {
+            this.todoList.projects.splice(projectIndex, 1);
+            if (this.currentProject === project) {
+                this.currentProject = null;
+                this.clearTasksContainer();
+            }
+            this.displayTodoLists();
+            this.displayTasks()
+            this.todoList.saveTodoList();
+        }
+    }
 
     displayTasks() {
         this.clearTasksContainer();
@@ -74,11 +97,25 @@ export class PageLoad {
 
             this.currentProject.tasks.forEach(task => {
                 const taskElement = document.createElement('div');
-                taskElement.textContent = task.title;
                 taskElement.classList.add('task-item');
+
+                const taskTitle = document.createElement('span');
+                taskTitle.textContent = task.title;
+                taskElement.appendChild(taskTitle);
+
+                const deleteIcon = document.createElement('i');
+                deleteIcon.classList.add('fa', 'fa-trash-o');
+                taskElement.appendChild(deleteIcon);
+
                 taskElement.addEventListener('click', () => {
                     this.openTaskDetails(task);
                 });
+
+                deleteIcon.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    this.deleteTask(task);
+                });
+
                 this.tasksContainer.appendChild(taskElement);
             });
 
@@ -130,8 +167,16 @@ export class PageLoad {
         });
     }
 
-
-
+    deleteTask(task) {
+        if (this.currentProject) {
+            const taskIndex = this.currentProject.tasks.indexOf(task);
+            if (taskIndex > -1) {
+                this.currentProject.tasks.splice(taskIndex, 1);
+                this.displayTasks();
+                console.log('test')
+            }
+        }
+    }
 
     displayProjectForm(buttonContainer, addTaskButton) {
         this.clearTasksContainer();
@@ -217,6 +262,10 @@ export class PageLoad {
         priorityInput.appendChild(option2);
         priorityInput.appendChild(option3);
 
+        const notesLabel = document.createElement('label');
+        notesLabel.textContent = 'Notes:';
+        const notesInput = document.createElement('textarea');
+
         const addButton = document.createElement('button');
         addButton.classList.add('addBtn');
         addButton.textContent = 'Add Task';
@@ -225,14 +274,17 @@ export class PageLoad {
             const description = descriptionInput.value;
             const dueDate = dueDateInput.value;
             const priority = priorityInput.value;
+            const notes = notesInput.value;
 
             const newTask = new Task(title, description, dueDate, priority);
+            newTask.notes = notes;
             this.currentProject.addTask(newTask);
 
             titleInput.value = '';
             descriptionInput.value = '';
             dueDateInput.value = '';
             priorityInput.value = '';
+            notesInput.value = '';
 
             this.displayTasks();
         });
@@ -253,12 +305,13 @@ export class PageLoad {
         formContainer.appendChild(dueDateInput);
         formContainer.appendChild(priorityLabel);
         formContainer.appendChild(priorityInput);
+        formContainer.appendChild(notesLabel);
+        formContainer.appendChild(notesInput);
         formContainer.appendChild(addButton);
         formContainer.appendChild(cancelButton);
 
         this.tasksContainer.appendChild(formContainer);
     }
-
 
 
     clearListsContainer() {
